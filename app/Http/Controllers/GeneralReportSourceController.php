@@ -230,7 +230,7 @@ class GeneralReportSourceController extends Controller
                 // $this->saveAck($request, $generalreportsource);
                 // $this->saveVerify($request, $generalreportsource);
                 // $this->saveLab($request, $generalreportsource);
-                $this->uploadFile($request, $generalreportsource, 'file');
+                $this->saveMediaField($request, $generalreportsource, 'file');
             } else {
                 // set terakhir disini
                 // $params['code'] = $this->generateKode($upt);;
@@ -248,7 +248,7 @@ class GeneralReportSourceController extends Controller
                 $this->GenerateReportLocation($request, $params, $generalreportsource, $upt);
                 $this->GenerateReportSpecies($request, $params, $generalreportsource);
                 $this->GenerateReportDiagnosis($request, $generalreportsource);
-                $this->uploadFile($request, $generalreportsource, 'file');
+                $this->saveMediaField($request, $generalreportsource, 'file');
                 $this->updateUserActivity();
 
                 $this->GenerateReportCommunity($request, $generalreportsource);
@@ -776,7 +776,7 @@ class GeneralReportSourceController extends Controller
                         'involved_doctors' => $params['involved_doctors'] ?? null,
                     ]);
 
-                    $this->uploadFile($request, $generalVerify, 'file_verification');
+                    $this->saveMediaField($request, $generalVerify, 'file_verification');
                     return [
                         'success' => true,
                         'data' => $generalreportverification
@@ -798,7 +798,7 @@ class GeneralReportSourceController extends Controller
             $generalreportverification->involved_doctors = $params['involved_doctors'] ?? null;
             $generalreportverification->save();
 
-            $this->uploadFile($request, $generalreportverification, 'file_verification');
+            $this->saveMediaField($request, $generalreportverification, 'file_verification');
 
             return [
                 'success' => true,
@@ -956,7 +956,7 @@ class GeneralReportSourceController extends Controller
                         'data_investigation' => $params['data_investigation']
                     ]);
 
-                    $this->uploadFile($request, $investigations, 'file_investigation');
+                    $this->saveMediaField($request, $investigations, 'file_investigation');
                     Log::info($request->file_investigation);
                     return [
                         'success' => true,
@@ -979,7 +979,7 @@ class GeneralReportSourceController extends Controller
                 $investigation1->save();
                 $investigation2 = GeneralReportInvestigation::where('id', $generalReportSource->id)->first();
 
-                $this->uploadFile($request, $investigation2, 'file_investigation');
+                $this->saveMediaField($request, $investigation2, 'file_investigation');
                 Log::info($request->file_investigation);
 
                 return [
@@ -1226,16 +1226,15 @@ class GeneralReportSourceController extends Controller
         }
     }
     /**
-     * Upload foto (helper internal)
+     * Simpan foto base64 ke koleksi media (helper internal)
      *
-     * ⚠️ Dipakai secara internal oleh `save()`, `saveVerify()`, `saveLab()`, dan
-     * `saveInvestigation()` untuk menyimpan foto base64 ke koleksi media terkait
-     * — bukan dipanggil langsung dengan signature standar `(Request $request)`.
-     * Route `general-reports/uploadPhoto` mengarah ke method ini tapi memerlukan
-     * argumen `$data`/`$only` yang tidak tersedia dari route resolver Laravel;
-     * gunakan upload foto inline lewat `save()` dkk, bukan endpoint ini.
+     * Dipakai secara internal oleh `save()`, `saveVerify()`, `saveLab()`, dan
+     * `saveInvestigation()` untuk menyimpan foto base64 (array `{file: [...]}`)
+     * ke koleksi media terkait. Bukan endpoint route — untuk upload foto via
+     * multipart/form-data (endpoint `general-reports/uploadPhoto`), lihat
+     * method `uploadFile(Request $request)` di bawah.
      */
-    public function uploadFile($request, $data, $only)
+    public function saveMediaField($request, $data, $only)
     {
         try {
 
@@ -1282,6 +1281,56 @@ class GeneralReportSourceController extends Controller
             return [
                 'success' => true,
                 // 'data' => $generalreportsource
+            ];
+        } catch (Exception $e) {
+            Log::error($this->controllerName . '-saveMediaField: success=false; error=' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => "Error, cannot load data"
+            ];
+        }
+    }
+
+    /**
+     * Upload foto laporan umum (multipart/form-data)
+     *
+     * Foto ditambahkan ke koleksi media yang sudah ada (append), bukan
+     * menimpa, karena endpoint ini dipanggil berulang di tahap Investigasi,
+     * Verifikasi Dokter Hewan, dan Investigasi Lanjutan untuk `id` yang sama.
+     */
+    public function uploadFile(Request $request)
+    {
+        try {
+            $request->validate([
+                'id' => 'required|integer',
+                'file' => 'required|file',
+            ]);
+
+            $id = $request->input('id');
+
+            $generalreportsource = GeneralReportSource::with('media')
+                ->where('status', 1)
+                ->where('id', $id)
+                ->first();
+
+            if (!$generalreportsource) {
+                return [
+                    'success' => false,
+                    'message' => "Error, data not found"
+                ];
+            }
+
+            $generalreportsource->addMediaFromRequest('file')
+                ->toMediaCollection();
+
+            $generalreportsource = GeneralReportSource::with('media')
+                ->where('status', 1)
+                ->where('id', $id)
+                ->first();
+
+            return [
+                'success' => true,
+                'data' => $generalreportsource
             ];
         } catch (Exception $e) {
             Log::error($this->controllerName . '-uploadFile: success=false; error=' . $e->getMessage());
@@ -1433,44 +1482,44 @@ class GeneralReportSourceController extends Controller
         $disease = Disease::where('id', $params['temporary_disease_id'])->first();
         // return $disease;
         if ($disease->priority === true) {
-                //level 4 petugas
-                $user = User::where('upt_type', auth()->user()->upt_type)
-                    ->orWhere('upt_type', 'PUSAT')
-                    ->orWhere('heads_upt', 1)
-                    ->get();
-                // return $user;
-                $token = [];
-                foreach ($user as $key => $value) {
-                    if ($value->user_level || $value->heads_upt) { //auth()->user()->upt_id
-                        array_push($token, $value->devices);
-                    }
-                };
+            //level 4 petugas
+            $user = User::where('upt_type', auth()->user()->upt_type)
+                ->orWhere('upt_type', 'PUSAT')
+                ->orWhere('heads_upt', 1)
+                ->get();
+            // return $user;
+            $token = [];
+            foreach ($user as $key => $value) {
+                if ($value->user_level || $value->heads_upt) { //auth()->user()->upt_id
+                    array_push($token, $value->devices);
+                }
+            };
 
-                // $firebasePETUGAS = User::where('user_level', 2)
-                //     ->orWhere('user_level', 3)
-                //     ->orWhere('user_level', 4)
-                //     ->orWhere('heads_upt', 1)
-                //     ->where('status', 1)
-                //     ->pluck('devices')
-                //     ->all();
+            // $firebasePETUGAS = User::where('user_level', 2)
+            //     ->orWhere('user_level', 3)
+            //     ->orWhere('user_level', 4)
+            //     ->orWhere('heads_upt', 1)
+            //     ->where('status', 1)
+            //     ->pluck('devices')
+            //     ->all();
 
-                $subject = 'SehatSatli';
-                $body = 'Laporan Penyakit Prioritas';
-                $dataJson = "Laporan Penyakit Prioritas";
+            $subject = 'SehatSatli';
+            $body = 'Laporan Penyakit Prioritas';
+            $dataJson = "Laporan Penyakit Prioritas";
 
-                // foreach ($firebasePETUGAS as $key => $item) {
-                //     $userInbox = new UserInbox();
-                //     // $userInbox->creator = auth()->user()->id;
-                //     // $userInbox->updater = auth()->user()->id;
-                //     $userInbox->status = 0;
-                //     $userInbox->user_id = $item->id;
-                //     $userInbox->received_date = date('Y-m-d');
-                //     $userInbox->read_date = date('Y-m-d');
-                //     $userInbox->subject =  $subject;
-                //     $userInbox->message = $body;
-                //     // $userInbox->read = ;
-                //     $userInbox->save();
-                // }
+            // foreach ($firebasePETUGAS as $key => $item) {
+            //     $userInbox = new UserInbox();
+            //     // $userInbox->creator = auth()->user()->id;
+            //     // $userInbox->updater = auth()->user()->id;
+            //     $userInbox->status = 0;
+            //     $userInbox->user_id = $item->id;
+            //     $userInbox->received_date = date('Y-m-d');
+            //     $userInbox->read_date = date('Y-m-d');
+            //     $userInbox->subject =  $subject;
+            //     $userInbox->message = $body;
+            //     // $userInbox->read = ;
+            //     $userInbox->save();
+            // }
 
 
             // return $token;
