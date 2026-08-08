@@ -11,3 +11,4 @@ Cara memulai :
 
 Jika perlu untuk testing seeder :
 php artisan migrate:rollback && php artisan migrate && php artisan db:seed
+# sehatsatli-v2-api
