@@ -1,0 +1,67 @@
+$registered_numbers = $db->query("SELECT ms_officer.id,ms_officer.name as offname,ms_officer.upt_id,ms_upt.name,ms_upt.type FROM ms_officer,ms_upt WHERE ms_officer.phone = '".$inbox["SenderNumber"]."' AND ms_officer.upt_id = ms_upt.id");
+        
+        foreach($registered_numbers as $registered_number){
+
+            $explode_text = explode("#",$inbox["TextDecoded"]);
+            $text_alert = str_replace("#", ".", $inbox["TextDecoded"]);
+
+            $formatError = 'false';
+            $dilindungi = '';
+            $datetimetoday = date('Y-m-d H:i:s');
+            $me_m = 'm';
+            $me_h = 's';
+            $locationName = str_replace(" ", "", $registered_number['name']);
+            $locationName = substr($locationName, 0, 12);
+            $find_m = strpos($explode_text[5], $me_m);
+            $find_h = strpos($explode_text[6], $me_h);
+
+            //Check Format M,H, Define total Dead/Live
+            if (($find_m === false && $find_h === false))  {
+                $formatError = 'true';
+            } else {
+                $dead = intval(preg_replace('/[^0-9]+/', '', $explode_text[5]), 10);
+                $live = intval(preg_replace('/[^0-9]+/', '', $explode_text[6]), 10);
+            }
+
+            //Check D/TD/TAK
+            if ($explode_text[1] == 'td'){ 
+                $dilindungi = 'No';
+            } else if ($explode_text[1] == 'd' ){ 
+                $dilindungi = 'Yes';
+            } else if ($explode_text[1] == 'tak' ){ 
+                $dilindungi = ' ';
+            } else {
+                $formatError == 'true';
+            }
+
+            if (count($explode_text) == '3' && $explode_text[1] == 'tak' && is_numeric($explode_text[2]) && strlen($explode_text[2]) == 8){
+                //EMPTY SMS REPORT 
+                //TamanSafari#TAK#01032017
+
+                $report_date = substr($explode_text[2],-4).'-'.substr($explode_text[2],2,2).'-'.substr($explode_text[2],0,2);
+                $reply_date = substr($explode_text[2],0,2).'/'.substr($explode_text[2],2,2).'/'.substr($explode_text[2],-4);
+
+                //INSERT-UPLOAD SMS
+                $result = $db->insert("tr_sms", 
+                    "case_type='tak'|
+                    location='".$explode_text[0]."'|
+                    report_date='".$report_date."'|
+                    species_name=''|
+                    protected=''|
+                    dead=''|
+                    live=''|
+                    description='Tidak Ada Kasus'|
+                    reporter_id='".$registered_number["id"]."'|
+                    phone_number='".$inbox["SenderNumber"]."'|
+                    created='".$datetimetoday."'");
+
+
+                //GET LAST INSERT ID
+                $lastIDs = $db->query("SELECT tr_sms.id FROM tr_sms ORDER BY id DESC LIMIT 0,1");
+                //print_r($lastIDs);
+                $nocase_m = substr($explode_text[2],2,2);
+                $nocase_y = substr($explode_text[2],-4);
+
+                //REPORT CODE
+                $kodeSMS = "LS-".$registered_number['type']."-".$locationName."-".$lastIDs[0]['id'];
+                $kodeLU = "LU-".$registered_number['type']."-".$locationName."-".$lastIDs[0]['id'];

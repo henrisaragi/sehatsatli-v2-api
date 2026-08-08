@@ -1,0 +1,734 @@
+<style>
+  :root{
+    --chrome-bg:#F1EFE4;
+    --chrome-bg-alt:#E7E3D3;
+    --chrome-ink:#1E2620;
+    --chrome-muted:#5B6659;
+    --chrome-amber:#B5751F;
+    --chrome-alert:#A83824;
+    --chrome-border:#D6D0BC;
+    --chrome-line: rgba(30,38,32,.08);
+
+    --app-primary:#1F4B3F;
+    --app-primary-strong:#163A30;
+    --app-primary-ink:#EFEDE2;
+    --app-amber:#D9922E;
+    --app-amber-ink:#4A2F07;
+    --app-success:#3C8558;
+    --app-success-ink:#0F2818;
+    --app-danger:#C1432E;
+    --app-danger-ink:#3A0F08;
+    --app-surface:#F7F5EE;
+    --app-surface-alt:#EFEBDE;
+    --app-ink:#1E2620;
+    --app-muted:#62705F;
+    --app-border:#DAD5C4;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --chrome-bg:#12211B;
+      --chrome-bg-alt:#1A2E25;
+      --chrome-ink:#ECE8DB;
+      --chrome-muted:#93A196;
+      --chrome-amber:#E3A544;
+      --chrome-alert:#E2604A;
+      --chrome-border:#2A3E33;
+      --chrome-line: rgba(236,232,219,.09);
+    }
+  }
+  :root[data-theme="dark"]{
+    --chrome-bg:#12211B;
+    --chrome-bg-alt:#1A2E25;
+    --chrome-ink:#ECE8DB;
+    --chrome-muted:#93A196;
+    --chrome-amber:#E3A544;
+    --chrome-alert:#E2604A;
+    --chrome-border:#2A3E33;
+    --chrome-line: rgba(236,232,219,.09);
+  }
+  :root[data-theme="light"]{
+    --chrome-bg:#F1EFE4;
+    --chrome-bg-alt:#E7E3D3;
+    --chrome-ink:#1E2620;
+    --chrome-muted:#5B6659;
+    --chrome-amber:#B5751F;
+    --chrome-alert:#A83824;
+    --chrome-border:#D6D0BC;
+    --chrome-line: rgba(30,38,32,.08);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 1px 1px, var(--chrome-line) 1px, transparent 1px) 0 0/24px 24px,
+      var(--chrome-bg);
+    color:var(--chrome-ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .serif{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;}
+  .mono{font-family:ui-monospace,"SF Mono","Cascadia Code","Roboto Mono",Consolas,monospace;}
+
+  a,button{font-family:inherit;}
+  button:focus-visible, a:focus-visible{
+    outline:2px solid var(--chrome-amber);
+    outline-offset:2px;
+  }
+
+  .stage{
+    max-width:1240px;
+    margin:0 auto;
+    padding:clamp(28px,5vw,64px) clamp(20px,5vw,48px) 80px;
+  }
+
+  /* ---------- Masthead ---------- */
+  .masthead{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    max-width:640px;
+    margin-bottom:clamp(36px,6vw,64px);
+  }
+  .eyebrow{
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--chrome-amber);
+    font-weight:600;
+  }
+  .masthead h1{
+    font-size:clamp(1.9rem,4vw,2.6rem);
+    line-height:1.15;
+    margin:0;
+    text-wrap:balance;
+    font-weight:600;
+  }
+  .masthead p{
+    margin:0;
+    color:var(--chrome-muted);
+    font-size:1rem;
+    line-height:1.6;
+    max-width:60ch;
+  }
+  .masthead .rule{
+    width:64px;
+    height:3px;
+    background:var(--chrome-amber);
+    border-radius:2px;
+  }
+
+  /* ---------- Rack of phones ---------- */
+  .rack{
+    display:flex;
+    gap:clamp(28px,3vw,44px);
+    overflow-x:auto;
+    padding:8px 4px 28px;
+    scroll-snap-type:x proximity;
+  }
+  .exhibit{
+    flex:0 0 auto;
+    width:272px;
+    scroll-snap-align:start;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .exhibit .tag{
+    font-size:.68rem;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--chrome-muted);
+    font-weight:600;
+  }
+  .exhibit .tag b{color:var(--chrome-ink);font-weight:700;letter-spacing:.02em;}
+  .exhibit .note{
+    font-size:.82rem;
+    line-height:1.55;
+    color:var(--chrome-muted);
+    padding-left:2px;
+  }
+  .exhibit .note strong{color:var(--chrome-ink);}
+
+  /* ---------- Phone frame ---------- */
+  .phone{
+    width:272px;
+    height:568px;
+    background:#0d1512;
+    border-radius:38px;
+    padding:10px;
+    box-shadow:0 22px 44px -18px rgba(0,0,0,.55), 0 2px 0 rgba(255,255,255,.03) inset;
+  }
+  .phone__screen{
+    position:relative;
+    width:100%;
+    height:100%;
+    background:var(--app-surface);
+    color:var(--app-ink);
+    border-radius:28px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    font-size:13.5px;
+  }
+  .phone__notch{
+    position:absolute;
+    top:8px; left:50%;
+    transform:translateX(-50%);
+    width:74px; height:16px;
+    background:#0d1512;
+    border-radius:10px;
+    z-index:5;
+  }
+  .statusbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px 4px;
+    font-size:11px;
+    font-weight:600;
+  }
+  .statusbar .glyphs{display:flex; align-items:center; gap:5px;}
+  .sig{display:flex; align-items:flex-end; gap:1.5px; height:8px;}
+  .sig i{display:block; width:2.5px; background:currentColor; border-radius:1px;}
+  .sig i:nth-child(1){height:3px;} .sig i:nth-child(2){height:5px;}
+  .sig i:nth-child(3){height:6.5px;} .sig i:nth-child(4){height:8px;}
+  .batt{width:18px; height:9px; border:1.4px solid currentColor; border-radius:2.5px; position:relative; padding:1px;}
+  .batt::after{content:"";position:absolute; right:-3px; top:2.5px; width:1.6px; height:4px; background:currentColor; border-radius:1px;}
+  .batt i{display:block; height:100%; width:78%; background:currentColor; border-radius:1px;}
+
+  .icon{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  .icon-sm{width:15px;height:15px;}
+
+  .appbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:2px 18px 14px;
+    color:var(--app-primary);
+  }
+  .appbar h2{
+    font-size:1.14rem; margin:0; font-weight:600; letter-spacing:.01em;
+  }
+  .appbar .sub{font-size:.68rem; color:var(--app-muted); margin-top:2px;}
+  .appbar--filled{
+    background:var(--app-primary);
+    color:var(--app-primary-ink);
+    padding-top:14px;
+  }
+  .appbar--filled h2{color:var(--app-primary-ink);}
+  .iconbtn{
+    width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:transparent;border:none;color:inherit;
+    position:relative;
+  }
+  .dot{
+    position:absolute; top:5px; right:5px;
+    width:7px;height:7px;border-radius:50%;
+    background:var(--app-danger);
+    border:1.5px solid var(--app-primary);
+  }
+
+  .screen-body{
+    flex:1; overflow:hidden; padding:0 16px 16px;
+    display:flex; flex-direction:column; gap:12px;
+  }
+
+  /* ---------- Bottom nav ---------- */
+  .bottomnav{
+    display:flex; border-top:1px solid var(--app-border);
+    background:var(--app-surface);
+    padding:8px 6px 12px;
+  }
+  .bottomnav a{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+    text-decoration:none; color:var(--app-muted);
+    font-size:.6rem; font-weight:600;
+  }
+  .bottomnav a.active{color:var(--app-primary);}
+  .bottomnav .navdot{position:relative;}
+  .bottomnav .badge{
+    position:absolute; top:-3px; right:-7px;
+    background:var(--app-danger); color:#fff;
+    font-size:.52rem; font-weight:700;
+    min-width:13px; height:13px; border-radius:7px;
+    display:flex;align-items:center;justify-content:center;
+    padding:0 3px;
+  }
+
+  /* ---------- shared bits ---------- */
+  .chip{
+    display:inline-flex; align-items:center; gap:5px;
+    padding:3px 9px; border-radius:20px;
+    font-size:.62rem; font-weight:700; letter-spacing:.02em;
+    white-space:nowrap;
+  }
+  .chip--danger{background:var(--app-danger);color:var(--app-danger-ink);background:#F3D9D2;color:#7A2415;}
+  .chip--amber{background:#F6E4C4;color:#6B4408;}
+  .chip--success{background:#D9ECE0;color:#1E5A38;}
+  .chip--muted{background:var(--app-surface-alt);color:var(--app-muted);}
+
+  .card{
+    background:#fff; border:1px solid var(--app-border); border-radius:14px;
+    padding:12px 14px;
+  }
+  .btn{
+    border:none; border-radius:12px; font-weight:700; font-size:.86rem;
+    padding:12px 16px; text-align:center; cursor:default;
+  }
+  .btn--primary{background:var(--app-primary); color:var(--app-primary-ink);}
+  .btn--outline{background:transparent; border:1.5px solid var(--app-primary); color:var(--app-primary);}
+  .btn--text{background:transparent; color:var(--app-muted); font-weight:600;}
+  .btn--block{display:block; width:100%;}
+
+  .field label{
+    display:block; font-size:.68rem; font-weight:700; letter-spacing:.05em;
+    text-transform:uppercase; color:var(--app-muted); margin-bottom:6px;
+  }
+  .field .input{
+    border:1.4px solid var(--app-border); border-radius:10px; padding:11px 12px;
+    background:var(--app-surface-alt); font-size:.88rem; color:var(--app-ink);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .field .input .ph{color:var(--app-muted);}
+
+  .stat{
+    flex:1; background:var(--app-surface-alt); border-radius:12px; padding:10px 12px;
+  }
+  .stat .n{font-size:1.3rem; font-weight:700; font-variant-numeric:tabular-nums;}
+  .stat .l{font-size:.64rem; color:var(--app-muted); font-weight:600; margin-top:2px;}
+
+  .fab{
+    position:absolute; right:16px; bottom:74px;
+    width:46px; height:46px; border-radius:50%;
+    background:var(--app-amber); color:var(--app-amber-ink);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 10px 18px -6px rgba(0,0,0,.35);
+  }
+
+  .badgemark{
+    width:44px;height:44px;border-radius:50%;
+    border:1.6px solid var(--app-primary);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--app-primary); font-weight:700; font-size:.92rem;
+  }
+
+  /* ---------- Timeline (detail screen) ---------- */
+  .tl{display:flex; flex-direction:column;}
+  .tl-item{display:flex; gap:10px;}
+  .tl-rail{display:flex; flex-direction:column; align-items:center; width:16px;}
+  .tl-dot{width:11px;height:11px;border-radius:50%; background:var(--app-primary); margin-top:4px; flex:0 0 auto;}
+  .tl-dot--pending{background:transparent; border:1.6px dashed var(--app-muted);}
+  .tl-dot--alert{background:var(--app-danger);}
+  .tl-line{flex:1; width:1.4px; background:var(--app-border); margin:2px 0;}
+  .tl-body{padding-bottom:14px;}
+  .tl-body h4{margin:0 0 2px; font-size:.82rem;}
+  .tl-body p{margin:0; font-size:.72rem; color:var(--app-muted); line-height:1.4;}
+  .tl-body .t{font-size:.62rem; color:var(--app-muted); margin-top:2px;}
+
+  /* ---------- progress stepper ---------- */
+  .steps{display:flex; gap:4px;}
+  .steps i{flex:1; height:4px; border-radius:3px; background:var(--app-border);}
+  .steps i.on{background:var(--app-primary);}
+
+  .maplike{
+    height:96px; border-radius:12px; border:1.4px dashed var(--app-border);
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 15px, var(--chrome-line) 15px, var(--chrome-line) 16px),
+      repeating-linear-gradient(90deg, transparent, transparent 15px, var(--chrome-line) 15px, var(--chrome-line) 16px),
+      var(--app-surface-alt);
+    display:flex; align-items:center; justify-content:center; color:var(--app-danger);
+  }
+
+  .thumbrow{display:flex; gap:8px;}
+  .thumb{width:52px;height:52px;border-radius:9px;background:var(--app-surface-alt); border:1px solid var(--app-border);}
+
+  .divider{height:1px; background:var(--app-border); margin:2px 0;}
+
+  /* ---------- token strip ---------- */
+  .tokens{
+    margin-top:8px;
+    border-top:1px solid var(--chrome-border);
+    padding-top:32px;
+    display:grid; gap:28px;
+  }
+  .tokens h3{
+    font-size:.72rem; text-transform:uppercase; letter-spacing:.12em;
+    color:var(--chrome-muted); margin:0 0 14px; font-weight:700;
+  }
+  .swatches{display:flex; flex-wrap:wrap; gap:10px;}
+  .swatch{
+    display:flex; align-items:center; gap:9px;
+    background:var(--chrome-bg-alt); border:1px solid var(--chrome-border);
+    border-radius:11px; padding:8px 12px 8px 8px;
+  }
+  .swatch .sq{width:26px;height:26px;border-radius:7px; flex:0 0 auto; border:1px solid rgba(0,0,0,.12);}
+  .swatch .lbl{font-size:.72rem; font-weight:600;}
+  .swatch .val{font-size:.66rem; color:var(--chrome-muted);}
+
+  .typespec{display:flex; flex-direction:column; gap:16px;}
+  .typespec .row{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;}
+  .typespec .row .lbl{width:150px; flex:0 0 auto; font-size:.68rem; color:var(--chrome-muted); text-transform:uppercase; letter-spacing:.08em; font-weight:700;}
+  .typespec .row .sample{font-size:1.3rem;}
+
+  footer{
+    margin-top:48px; padding-top:20px; border-top:1px solid var(--chrome-border);
+    color:var(--chrome-muted); font-size:.76rem;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+  }
+
+  @media (max-width:600px){
+    .typespec .row .lbl{width:100%;}
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M8 9.5h8M8 13h8M8 16.5h5"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10Z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.4"/><path d="M5 20c1-3.7 4-5.5 7-5.5s6 1.8 7 5.5"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 17a4 4 0 0 1-.5-8 5.5 5.5 0 0 1 10.7-1.6A4.2 4.2 0 0 1 17 17H7Z"/><path d="M12 12v6M9.5 15.5 12 13l2.5 2.5"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+  </defs>
+</svg>
+
+<div class="stage">
+
+  <div class="masthead">
+    <span class="eyebrow">Desain UI &middot; Sehat Satli Mobile</span>
+    <h1 class="serif">Identitas visual untuk petugas lapangan</h1>
+    <div class="rule"></div>
+    <p>Enam layar kunci dari alur inti aplikasi &mdash; mulai dari masuk, membuat laporan kasus satwa secara luring, hingga menindaklanjuti notifikasi. Palet <em>forest &amp; field-amber</em> dipilih agar status sinkronisasi dan prioritas penyakit tetap terbaca jelas di bawah sinar matahari, sesuai kondisi kerja di lapangan.</p>
+  </div>
+
+  <div class="rack">
+
+    <!-- 1. LOGIN -->
+    <div class="exhibit">
+      <span class="tag"><b>01</b> &middot; Masuk</span>
+      <div class="phone">
+        <div class="phone__screen">
+          <div class="phone__notch"></div>
+          <div class="statusbar">
+            <span class="mono">9:41</span>
+            <span class="glyphs">
+              <span class="sig"><i></i><i></i><i></i><i></i></span>
+              <span class="batt"><i></i></span>
+            </span>
+          </div>
+          <div class="screen-body" style="justify-content:center; gap:26px; padding-top:0;">
+            <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+              <div class="badgemark serif">SS</div>
+              <div class="serif" style="font-size:1.15rem; font-weight:700;">Sehat Satli</div>
+              <div style="font-size:.68rem; color:var(--app-muted); text-align:center; line-height:1.4;">
+                Sistem Informasi Kesehatan<br/>Satwa Liar &mdash; Ditjen KSDAE
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:14px;">
+              <div class="field">
+                <label>Username</label>
+                <div class="input"><span class="ph">Email atau nomor HP</span></div>
+              </div>
+              <div class="field">
+                <label>Kata Sandi</label>
+                <div class="input"><span class="mono">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span></div>
+              </div>
+              <div class="btn btn--primary btn--block">Masuk</div>
+              <div style="text-align:center; font-size:.68rem; color:var(--app-muted);">Lupa kata sandi? Hubungi admin UPT Anda</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="note">Tanpa alur reset password mandiri &mdash; sesuai backend, ganti sandi hanya bisa dilakukan setelah masuk. Teks bantuan diarahkan ke admin UPT.</p>
+    </div>
+
+    <!-- 2. BERANDA -->
+    <div class="exhibit">
+      <span class="tag"><b>02</b> &middot; Beranda</span>
+      <div class="phone">
+        <div class="phone__screen">
+          <div class="phone__notch"></div>
+          <div class="statusbar">
+            <span class="mono">9:41</span>
+            <span class="glyphs"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"><i></i></span></span>
+          </div>
+          <div class="appbar appbar--filled">
+            <div>
+              <h2 class="serif">Beranda</h2>
+              <div class="sub" style="color:var(--app-primary-ink); opacity:.75;">Ahmad &middot; BKSDA Jawa Timur</div>
+            </div>
+            <button class="iconbtn"><svg class="icon"><use href="#i-bell"/></svg><span class="dot"></span></button>
+          </div>
+          <div class="screen-body">
+            <div class="card" style="border-left:4px solid var(--app-amber); display:flex; align-items:center; gap:10px;">
+              <svg class="icon" style="color:var(--app-amber);"><use href="#i-cloud"/></svg>
+              <div style="flex:1;">
+                <div style="font-weight:700; font-size:.8rem;">3 laporan menunggu sinkron</div>
+                <div style="font-size:.66rem; color:var(--app-muted);">Terakhir tersambung 2 jam lalu</div>
+              </div>
+              <div class="btn btn--text" style="padding:6px 4px; font-size:.68rem; color:var(--app-primary);">Sinkron</div>
+            </div>
+
+            <div class="btn btn--primary btn--block" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:16px;">
+              <svg class="icon" style="width:18px;height:18px;"><use href="#i-plus"/></svg>
+              Buat Laporan Baru
+            </div>
+
+            <div>
+              <div style="font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--app-muted); margin-bottom:8px;">Ringkasan bulan ini</div>
+              <div style="display:flex; gap:8px;">
+                <div class="stat"><div class="n">18</div><div class="l">Total Laporan</div></div>
+                <div class="stat"><div class="n" style="color:var(--app-danger);">2</div><div class="l">Prioritas</div></div>
+                <div class="stat"><div class="n" style="color:var(--app-success);">14</div><div class="l">Terverifikasi</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="bottomnav">
+            <a class="active"><svg class="icon icon-sm"><use href="#i-home"/></svg>Beranda</a>
+            <a><svg class="icon icon-sm"><use href="#i-list"/></svg>Laporan</a>
+            <a><span class="navdot"><svg class="icon icon-sm"><use href="#i-bell"/></svg><span class="badge">2</span></span>Notifikasi</a>
+            <a><svg class="icon icon-sm"><use href="#i-user"/></svg>Profil</a>
+          </div>
+        </div>
+      </div>
+      <p class="note">Status sinkron ditaruh paling atas &mdash; bukan di menu tersembunyi &mdash; karena koneksi lapangan sering putus-nyambung.</p>
+    </div>
+
+    <!-- 3. LIST LAPORAN -->
+    <div class="exhibit">
+      <span class="tag"><b>03</b> &middot; List Laporan</span>
+      <div class="phone">
+        <div class="phone__screen" style="position:relative;">
+          <div class="phone__notch"></div>
+          <div class="statusbar">
+            <span class="mono">9:41</span>
+            <span class="glyphs"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"><i></i></span></span>
+          </div>
+          <div class="appbar">
+            <h2>Laporan Kasus</h2>
+            <button class="iconbtn"><svg class="icon"><use href="#i-filter"/></svg></button>
+          </div>
+          <div class="screen-body">
+            <div style="display:flex; gap:8px;">
+              <span class="chip" style="background:var(--app-primary); color:var(--app-primary-ink);">Semua</span>
+              <span class="chip chip--muted">Draft</span>
+              <span class="chip chip--muted">Prioritas</span>
+            </div>
+
+            <div class="card" style="display:flex; flex-direction:column; gap:6px;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div style="font-weight:700; font-size:.86rem;">Harimau Sumatera</div>
+                <span class="chip chip--danger">Prioritas</span>
+              </div>
+              <div class="mono" style="font-size:.62rem; color:var(--app-muted);">LUKSDABKSDAJATIM0482</div>
+              <div style="font-size:.68rem; color:var(--app-muted);">02 Agu 2026 &middot; SM Muara Angke</div>
+            </div>
+
+            <div class="card" style="display:flex; flex-direction:column; gap:6px;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div style="font-weight:700; font-size:.86rem;">Elang Jawa</div>
+                <span class="chip chip--amber">Sync Pending</span>
+              </div>
+              <div class="mono" style="font-size:.62rem; color:var(--app-muted);">LUTNTNMERUBETIRI0479</div>
+              <div style="font-size:.68rem; color:var(--app-muted);">30 Jul 2026 &middot; TN Meru Betiri</div>
+            </div>
+
+            <div class="card" style="display:flex; flex-direction:column; gap:6px;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div style="font-weight:700; font-size:.86rem;">Rusa Timor</div>
+                <span class="chip chip--success">Terverifikasi</span>
+              </div>
+              <div class="mono" style="font-size:.62rem; color:var(--app-muted);">LUKSDABKSDAJATIM0475</div>
+              <div style="font-size:.68rem; color:var(--app-muted);">27 Jul 2026 &middot; BKSDA Jatim</div>
+            </div>
+          </div>
+          <div class="fab"><svg class="icon" style="width:20px;height:20px;"><use href="#i-plus"/></svg></div>
+          <div class="bottomnav">
+            <a><svg class="icon icon-sm"><use href="#i-home"/></svg>Beranda</a>
+            <a class="active"><svg class="icon icon-sm"><use href="#i-list"/></svg>Laporan</a>
+            <a><svg class="icon icon-sm"><use href="#i-bell"/></svg>Notifikasi</a>
+            <a><svg class="icon icon-sm"><use href="#i-user"/></svg>Profil</a>
+          </div>
+        </div>
+      </div>
+      <p class="note">Kode laporan pakai monospace agar sejajar seperti pada stempel formulir kertas &mdash; mengikuti pola <code class="mono">generateKode()</code> di backend.</p>
+    </div>
+
+    <!-- 4. DETAIL LAPORAN -->
+    <div class="exhibit">
+      <span class="tag"><b>04</b> &middot; Detail Laporan</span>
+      <div class="phone">
+        <div class="phone__screen">
+          <div class="phone__notch"></div>
+          <div class="statusbar">
+            <span class="mono">9:41</span>
+            <span class="glyphs"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"><i></i></span></span>
+          </div>
+          <div class="appbar">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="iconbtn" style="width:24px;"><svg class="icon icon-sm"><use href="#i-back"/></svg></button>
+              <div>
+                <h2 style="font-size:.98rem;">Detail Laporan</h2>
+                <div class="sub mono">LUKSDABKSDAJATIM0482</div>
+              </div>
+            </div>
+          </div>
+          <div class="screen-body">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-weight:700; font-size:.92rem;">Harimau Sumatera</div>
+                <div style="font-size:.68rem; font-style:italic; color:var(--app-muted);">Panthera tigris sumatrae</div>
+              </div>
+              <span class="chip chip--danger">Zoonosis</span>
+            </div>
+            <div class="divider"></div>
+            <div class="tl">
+              <div class="tl-item">
+                <div class="tl-rail"><div class="tl-dot"></div><div class="tl-line"></div></div>
+                <div class="tl-body"><h4>Pelapor</h4><p>Ahmad &middot; Petugas Lapangan BKSDA</p><div class="t">02 Agu, 07.40</div></div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-rail"><div class="tl-dot"></div><div class="tl-line"></div></div>
+                <div class="tl-body"><h4>Lokasi</h4><p>SM Muara Angke, Jakarta Utara</p><div class="t">02 Agu, 07.42</div></div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-rail"><div class="tl-dot"></div><div class="tl-line"></div></div>
+                <div class="tl-body"><h4>Spesies &amp; Diagnosis</h4><p>1 individu ditemukan mati</p><div class="t">02 Agu, 07.50</div></div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-rail"><div class="tl-dot tl-dot--alert"></div><div class="tl-line"></div></div>
+                <div class="tl-body"><h4>Verifikasi Dokter</h4><p>drh. Siti Rahma &middot; Suspek Antraks</p><div class="t">02 Agu, 14.10</div></div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-rail"><div class="tl-dot tl-dot--pending"></div></div>
+                <div class="tl-body"><h4 style="color:var(--app-muted);">Hasil Lab</h4><p>Menunggu sampel diproses</p></div>
+              </div>
+            </div>
+            <div class="thumbrow"><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div></div>
+          </div>
+        </div>
+      </div>
+      <p class="note">Tahap bersifat <strong>progresif</strong> &mdash; titik putus-putus menandai tahap yang belum diisi (mengikuti field opsional <code class="mono">verification/lab/investigation</code> di API).</p>
+    </div>
+
+    <!-- 5. FORM LOKASI -->
+    <div class="exhibit">
+      <span class="tag"><b>05</b> &middot; Form &middot; Lokasi</span>
+      <div class="phone">
+        <div class="phone__screen">
+          <div class="phone__notch"></div>
+          <div class="statusbar">
+            <span class="mono">9:41</span>
+            <span class="glyphs"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"><i></i></span></span>
+          </div>
+          <div class="appbar">
+            <button class="iconbtn"><svg class="icon"><use href="#i-x"/></svg></button>
+            <div style="text-align:right;">
+              <h2 style="font-size:.9rem;">Laporan Baru</h2>
+              <div class="sub mono">Langkah 3/6</div>
+            </div>
+          </div>
+          <div style="padding:0 18px;"><div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div></div>
+          <div class="screen-body">
+            <div class="serif" style="font-size:1.05rem; font-weight:700;">Lokasi Kejadian</div>
+
+            <div class="field"><label>Provinsi</label><div class="input">Jawa Timur <svg class="icon icon-sm" style="color:var(--app-muted);"><use href="#i-chev"/></svg></div></div>
+            <div class="field"><label>Kabupaten / Kota</label><div class="input">Kab. Banyuwangi <svg class="icon icon-sm" style="color:var(--app-muted);"><use href="#i-chev"/></svg></div></div>
+            <div class="field"><label>Kecamatan</label><div class="input"><span class="ph">Pilih kecamatan</span> <svg class="icon icon-sm" style="color:var(--app-muted);"><use href="#i-chev"/></svg></div></div>
+
+            <div class="btn btn--outline btn--block" style="display:flex; align-items:center; justify-content:center; gap:7px;">
+              <svg class="icon icon-sm"><use href="#i-pin"/></svg> Ambil Lokasi GPS Saat Ini
+            </div>
+            <div class="maplike"><svg class="icon"><use href="#i-pin"/></svg></div>
+            <div class="mono" style="font-size:.64rem; color:var(--app-muted); text-align:center;">-8.3405, 114.3583 &middot; akurasi &plusmn;8m</div>
+          </div>
+          <div style="display:flex; gap:10px; padding:12px 18px 16px; border-top:1px solid var(--app-border);">
+            <div class="btn btn--text" style="flex:0 0 auto;">Kembali</div>
+            <div class="btn btn--primary" style="flex:1;">Lanjut</div>
+          </div>
+        </div>
+      </div>
+      <p class="note">Setiap langkah bisa disimpan sebagai draft ke outbox lokal &mdash; pengisian panjang di lapangan tidak hilang saat app tertutup atau baterai habis.</p>
+    </div>
+
+    <!-- 6. NOTIFIKASI -->
+    <div class="exhibit">
+      <span class="tag"><b>06</b> &middot; Notifikasi</span>
+      <div class="phone">
+        <div class="phone__screen">
+          <div class="phone__notch"></div>
+          <div class="statusbar">
+            <span class="mono">9:41</span>
+            <span class="glyphs"><span class="sig"><i></i><i></i><i></i><i></i></span><span class="batt"><i></i></span></span>
+          </div>
+          <div class="appbar"><h2>Notifikasi</h2></div>
+          <div class="screen-body">
+            <div class="card" style="display:flex; gap:10px; align-items:flex-start; border-color:var(--app-amber);">
+              <span style="width:7px;height:7px;border-radius:50%;background:var(--app-amber); margin-top:6px; flex:0 0 auto;"></span>
+              <div style="flex:1;">
+                <div style="font-weight:700; font-size:.8rem;">Laporan baru masuk &mdash; SM Muara Angke</div>
+                <div style="font-size:.66rem; color:var(--app-muted); margin-top:2px;">10 menit lalu</div>
+              </div>
+            </div>
+            <div class="card" style="display:flex; gap:10px; align-items:flex-start;">
+              <span style="width:7px;height:7px;margin-top:6px; flex:0 0 auto;"></span>
+              <div style="flex:1;">
+                <div style="font-weight:600; font-size:.8rem; color:var(--app-muted);">Verifikasi selesai untuk <span class="mono">LUKSDABKSDAJATIM0475</span></div>
+                <div style="font-size:.66rem; color:var(--app-muted); margin-top:2px;">Kemarin</div>
+              </div>
+            </div>
+            <div class="card" style="display:flex; gap:10px; align-items:flex-start;">
+              <span style="width:7px;height:7px;margin-top:6px; flex:0 0 auto;"></span>
+              <div style="flex:1;">
+                <div style="font-weight:600; font-size:.8rem; color:var(--app-muted);">Pembaruan master data penyakit</div>
+                <div style="font-size:.66rem; color:var(--app-muted); margin-top:2px;">3 hari lalu</div>
+              </div>
+            </div>
+          </div>
+          <div class="bottomnav">
+            <a><svg class="icon icon-sm"><use href="#i-home"/></svg>Beranda</a>
+            <a><svg class="icon icon-sm"><use href="#i-list"/></svg>Laporan</a>
+            <a class="active"><span class="navdot"><svg class="icon icon-sm"><use href="#i-bell"/></svg><span class="badge">2</span></span>Notifikasi</a>
+            <a><svg class="icon icon-sm"><use href="#i-user"/></svg>Profil</a>
+          </div>
+        </div>
+      </div>
+      <p class="note">Gabungan push FCM &amp; inbox in-app (<code class="mono">user-inbox/*</code>) dalam satu daftar supaya petugas tidak perlu cek dua tempat.</p>
+    </div>
+
+  </div>
+
+  <div class="tokens">
+    <section>
+      <h3>Palet warna</h3>
+      <div class="swatches">
+        <div class="swatch"><span class="sq" style="background:#1F4B3F"></span><div><div class="lbl">Forest (primary)</div><div class="val mono">#1F4B3F</div></div></div>
+        <div class="swatch"><span class="sq" style="background:#163A30"></span><div><div class="lbl">Forest strong</div><div class="val mono">#163A30</div></div></div>
+        <div class="swatch"><span class="sq" style="background:#D9922E"></span><div><div class="lbl">Field amber</div><div class="val mono">#D9922E</div></div></div>
+        <div class="swatch"><span class="sq" style="background:#3C8558"></span><div><div class="lbl">Success</div><div class="val mono">#3C8558</div></div></div>
+        <div class="swatch"><span class="sq" style="background:#C1432E"></span><div><div class="lbl">Danger / zoonosis</div><div class="val mono">#C1432E</div></div></div>
+        <div class="swatch"><span class="sq" style="background:#F7F5EE; border-color:#DAD5C4;"></span><div><div class="lbl">Surface</div><div class="val mono">#F7F5EE</div></div></div>
+        <div class="swatch"><span class="sq" style="background:#1E2620"></span><div><div class="lbl">Ink</div><div class="val mono">#1E2620</div></div></div>
+      </div>
+    </section>
+
+    <section>
+      <h3>Tipografi</h3>
+      <div class="typespec">
+        <div class="row"><span class="lbl">Judul / app bar</span><span class="sample serif">Detail Laporan Kasus</span></div>
+        <div class="row"><span class="lbl">Isi / UI</span><span class="sample">Verifikasi selesai untuk laporan ini</span></div>
+        <div class="row"><span class="lbl">Data / kode</span><span class="sample mono">LUKSDABKSDAJATIM0482</span></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <span>Sehat Satli &middot; Mobile UI Mockup</span>
+    <span>Referensi task &amp; endpoint: tasks.md &middot; API_ENDPOINTS.md</span>
+  </footer>
+
+</div>
