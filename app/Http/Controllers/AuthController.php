@@ -233,6 +233,49 @@ class AuthController extends Controller
     }
 
     /**
+     * Register
+     *
+     * Registrasi akun baru hanya dengan `email` dan `password`. `username`
+     * di-generate otomatis dari MD5(email), mengikuti pola yang dipakai
+     * `login()`/`UserController::save()`. Berhasil register langsung
+     * mengembalikan Passport access token (Bearer), sama seperti `/auth/login`.
+     */
+    public function register(Request $request)
+    {
+        try {
+            $request->validate([
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|string|min:8',
+            ]);
+
+            $email = $request->email;
+
+            $user = new User();
+            $user->name = explode('@', $email)[0];
+            $user->email = $email;
+            $user->username = md5($email);
+            $user->password = Hash::make($request->password);
+            $user->reset_password = false;
+            $user->save();
+
+            $accessToken = $user->createToken('api')->accessToken;
+
+            Log::info($this->controllerName . '-register: success=true; email=' . $email);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'user' => $user,
+                    'access_token' => $accessToken,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::info($this->controllerName . '-register: success=false; error=' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Logout
      *
      * Mencabut (revoke) Passport access token yang sedang dipakai dan menghapus

@@ -134,6 +134,7 @@ Route::post('dokter/getOne', [UserController::class, 'getOneDokter']);
 Route::post('auth/login', [AuthController::class, 'login']);
 Route::post('auth/login-app', [AuthController::class, 'loginApp']);
 Route::post('auth/logout', [AuthController::class, 'logout']);
+Route::post('auth/register', [AuthController::class, 'register']);
 
 
 //Route::post('masterss', [ApiController::class, 'getMaster']);
