@@ -21,76 +21,76 @@ class AuthController extends Controller
     /**
      * Login
      */
- 
-     /**
-      * Login
-      *
-      * Login menggunakan email atau nomor HP sebagai username. Backend mencocokkan
-      * nilai `username` terhadap kolom `username`/`username1` (masing-masing berisi
-      * MD5 dari email dan nomor HP). Jika berhasil, mengembalikan Passport access
-      * token (Bearer) dan data user lengkap.
-      */
-     public function login(Request $request)
-     {
-         try {
-             // Validasi input
-             $request->validate([
-                 'username' => 'required',
-                 'password' => 'required',
-             ]);
-     
-             $username = $request->username;
-     
-             // Mencari user berdasarkan username atau username1
-             $user = User::where('username', $username)
-                 ->orWhere('username1', $username)
-                 ->first();
-             // Jika user tidak ditemukan, beri respons yang sesuai
-             if (!$user) {
-                 return response()->json([
-                     'success' => false,
-                     'message' => 'User not found'
-                 ], 404);
-             }
-     
-             // Melakukan autentikasi dengan data yang ditemukan
-             $data = [
-                 'username' => $user->username,
-                 'password' => $request->password,
-                 'status' => 1
-             ];
-             // Melakukan autentikasi
-             if (auth()->attempt($data)) {
-                 // Jika autentikasi berhasil, buat akses token
-                 $accessToken = auth()->user()->createToken('api')->accessToken;
-                 $authUser = User::find(auth()->user()->id);
-     
-                 Log::info($this->controllerName . '-login: success=true; username:' . $data['username']);
-                 
-                 $data = [
-                     "user" => $authUser,
-                     'access_token' => $accessToken
-                 ];
-                 return response()->json([
-                     'success' => true,
-                     'data' => $data
-                 ]);
-             } else {
-                 Log::info($this->controllerName . '-login: success=false; username:' . $data['username']);
-     
-                 return response()->json([
-                     'success' => false,
-                     'message' => [
-                         'username' => 'Check your username',
-                         'password' => 'Check your password'
-                     ]
-                 ], 200);
-             }
-         } catch (\Exception $e) {
-             Log::info($this->controllerName . '-login: success=false; error=' . $e->getMessage());
-             return response()->json(['error' => $e->getMessage()], 500);
-         }
-     }
+
+    /**
+     * Login
+     *
+     * Login menggunakan email atau nomor HP sebagai username. Backend mencocokkan
+     * nilai `username` terhadap kolom `username`/`username1` (masing-masing berisi
+     * MD5 dari email dan nomor HP). Jika berhasil, mengembalikan Passport access
+     * token (Bearer) dan data user lengkap.
+     */
+    public function login(Request $request)
+    {
+        try {
+            // Validasi input
+            $request->validate([
+                'username' => 'required',
+                'password' => 'required',
+            ]);
+
+            $username = $request->username;
+
+            // Mencari user berdasarkan username atau username1
+            $user = User::where('username', $username)
+                ->orWhere('username1', $username)
+                ->first();
+            // Jika user tidak ditemukan, beri respons yang sesuai
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+
+            // Melakukan autentikasi dengan data yang ditemukan
+            $data = [
+                'username' => $user->username,
+                'password' => $request->password,
+                'status' => 1
+            ];
+            // Melakukan autentikasi
+            if (auth()->attempt($data)) {
+                // Jika autentikasi berhasil, buat akses token
+                $accessToken = auth()->user()->createToken('api')->accessToken;
+                $authUser = User::find(auth()->user()->id);
+
+                Log::info($this->controllerName . '-login: success=true; username:' . $data['username']);
+
+                $data = [
+                    "user" => $authUser,
+                    'access_token' => $accessToken
+                ];
+                return response()->json([
+                    'success' => true,
+                    'data' => $data
+                ]);
+            } else {
+                Log::info($this->controllerName . '-login: success=false; username:' . $data['username']);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => [
+                        'username' => 'Check your username',
+                        'password' => 'Check your password'
+                    ]
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            Log::info($this->controllerName . '-login: success=false; error=' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
      
      
      // public function login(Request $request)
@@ -173,40 +173,42 @@ class AuthController extends Controller
     /**
      * Login (mobile app)
      *
-     * Sama dengan `/auth/login`, dipakai khusus oleh mobile app. Login menggunakan
-     * email atau nomor HP sebagai username (dicocokkan ke `username`/`username1`
-     * yang di-hash MD5 di backend).
+     * Login standar menggunakan `email` (bukan `username`/MD5). Dipakai khusus
+     * oleh mobile app.
      */
     public function loginApp(Request $request)
     {
         try {
             $request->validate([
-                'username' => 'required|string',
+                'email' => 'required|email',
                 'password' => 'required|string',
             ]);
 
-            $username = $request->username;
+            $email = $request->email;
 
-            //$user = User::where('phone', $phone)->first();
-            $user = User::where('username', $username)
-                ->orWhere('username1', $username)
-                ->first();
+            $user = User::where('email', $email)->first();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
 
             $data = [
-                'username' => $user->username,
+                'email' => $user->email,
                 'password' => $request->password,
                 'status' => 1
             ];
-
-            //dd($data);
 
             if (auth()->attempt($data)) {
                 $accessToken = auth()->user()->createToken('api')->accessToken;
                 $authUser = User::find(auth()->user()->id);
 
-                Log::info($this->controllerName . '-login: success=true; username:' . $data['username']);
+                Log::info($this->controllerName . '-loginApp: success=true; email:' . $data['email']);
                 $data = [
                     "user" => $authUser,
+                    'role' => $authUser->user_level,
                     'access_token' => $accessToken
                 ];
                 return response()->json([
@@ -215,19 +217,18 @@ class AuthController extends Controller
                 ]);
             } else {
 
-                Log::info($this->controllerName . '-login: success=false; username:' . $data['username']);
+                Log::info($this->controllerName . '-loginApp: success=false; email:' . $data['email']);
 
                 return response()->json([
                     'success' => false,
                     'message' => [
-                        'username' => 'Check your username',
+                        'email' => 'Check your email',
                         'password' => 'Check your password'
                     ]
                 ], 200);
             }
         } catch (\Exception $e) {
-            Log::info($this->controllerName . '-login: success=false; error=' . $e->getMessage());
-            // activity()->log($this->controllerName . '-login: success=false; error=' . $e->getMessage());
+            Log::info($this->controllerName . '-loginApp: success=false; error=' . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
