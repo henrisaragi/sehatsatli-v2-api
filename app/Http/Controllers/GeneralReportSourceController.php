@@ -108,6 +108,33 @@ class GeneralReportSourceController extends Controller
     }
 
     /**
+     * Cek id terakhir GeneralReportSource
+     *
+     * Mengembalikan `id` record `GeneralReportSource` terakhir (berdasarkan
+     * `created_at` terbaru, mengikuti logika `generateKode()`). Berguna untuk
+     * preview nomor urut/`report_code` berikutnya di sisi client sebelum submit.
+     */
+    public function getLastId()
+    {
+        try {
+            $lastRecord = GeneralReportSource::latest()->first();
+
+            return [
+                'success' => true,
+                'data' => [
+                    'last_id' => $lastRecord ? $lastRecord->id : 0,
+                ],
+            ];
+        } catch (Exception $e) {
+            Log::info($this->controllerName . '-getLastId: success=false; error=' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => "Error, cannot load data"
+            ];
+        }
+    }
+
+    /**
      * Buat/ubah laporan kasus (web)
      *
      * Payload flat berisi field dari beberapa tahap sekaligus (data laporan induk,

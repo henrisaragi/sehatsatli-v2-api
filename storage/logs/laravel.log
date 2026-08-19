@@ -3,3 +3,8 @@
 [2026-08-12 01:39:01] local.INFO: AuthController-loginApp: success=false; email:monev.ectad@gmail.com  
 [2026-08-12 01:39:11] local.INFO: AuthController-loginApp: success=false; email:monev.ectad@gmail.com  
 [2026-08-12 01:40:07] local.INFO: AuthController-loginApp: success=true; email:monev.ectad@gmail.com  
+[2026-08-12 08:35:48] local.INFO: AuthController-loginApp: success=true; email:monev.ectad@gmail.com  
+[2026-08-12 08:38:34] local.INFO: AuthController-loginApp: success=true; email:monev.ectad@gmail.com  
+[2026-08-12 08:38:34] local.ERROR: GeneralReportSourceController-uploadFile: success=false; error=validation.required  
+[2026-08-12 08:38:59] local.INFO: AuthController-loginApp: success=true; email:monev.ectad@gmail.com  
+[2026-08-12 08:38:59] local.ERROR: GeneralReportSourceController-uploadFile: success=false; error=validation.file  

@@ -25,26 +25,21 @@ class AuthController extends Controller
     /**
      * Login
      *
-     * Login menggunakan email atau nomor HP sebagai username. Backend mencocokkan
-     * nilai `username` terhadap kolom `username`/`username1` (masing-masing berisi
-     * MD5 dari email dan nomor HP). Jika berhasil, mengembalikan Passport access
-     * token (Bearer) dan data user lengkap.
+     * Login standar menggunakan `email` (bukan `username`/MD5).
      */
     public function login(Request $request)
     {
         try {
             // Validasi input
             $request->validate([
-                'username' => 'required',
-                'password' => 'required',
+                'email' => 'required|email',
+                'password' => 'required|string',
             ]);
 
-            $username = $request->username;
+            $email = $request->email;
 
-            // Mencari user berdasarkan username atau username1
-            $user = User::where('username', $username)
-                ->orWhere('username1', $username)
-                ->first();
+            $user = User::where('email', $email)->first();
+
             // Jika user tidak ditemukan, beri respons yang sesuai
             if (!$user) {
                 return response()->json([
@@ -55,7 +50,7 @@ class AuthController extends Controller
 
             // Melakukan autentikasi dengan data yang ditemukan
             $data = [
-                'username' => $user->username,
+                'email' => $user->email,
                 'password' => $request->password,
                 'status' => 1
             ];
@@ -65,10 +60,11 @@ class AuthController extends Controller
                 $accessToken = auth()->user()->createToken('api')->accessToken;
                 $authUser = User::find(auth()->user()->id);
 
-                Log::info($this->controllerName . '-login: success=true; username:' . $data['username']);
+                Log::info($this->controllerName . '-login: success=true; email:' . $data['email']);
 
                 $data = [
                     "user" => $authUser,
+                    'role' => $authUser->user_level,
                     'access_token' => $accessToken
                 ];
                 return response()->json([
@@ -76,12 +72,12 @@ class AuthController extends Controller
                     'data' => $data
                 ]);
             } else {
-                Log::info($this->controllerName . '-login: success=false; username:' . $data['username']);
+                Log::info($this->controllerName . '-login: success=false; email:' . $data['email']);
 
                 return response()->json([
                     'success' => false,
                     'message' => [
-                        'username' => 'Check your username',
+                        'email' => 'Check your email',
                         'password' => 'Check your password'
                     ]
                 ], 200);

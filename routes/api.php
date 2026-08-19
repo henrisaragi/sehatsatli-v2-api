@@ -89,6 +89,7 @@ $apiRoutes = function () {
 
     Route::post('general-reports/getAll', [GeneralReportSourceController::class, 'getAll']);
     Route::post('general-reports/getOne', [GeneralReportSourceController::class, 'getOne']);
+    Route::post('general-reports/getLastId', [GeneralReportSourceController::class, 'getLastId']);
     Route::post('general-reports/delete', [GeneralReportSourceController::class, 'delete']);
     Route::post('general-reports/save', [GeneralReportSourceController::class, 'save']);
     Route::post('general-reports/uploadPhoto', [GeneralReportSourceController::class, 'uploadFile']);
