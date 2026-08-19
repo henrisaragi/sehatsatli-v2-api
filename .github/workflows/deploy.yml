@@ -1,4 +1,4 @@
-name: Deploy Koleksi via Self-Hosted Runner
+name: Deploy SehatSatli API via Self-Hosted Runner
 
 on:
   push:
@@ -9,7 +9,7 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Execution Deployment Koleksi
+      - name: Execution Deployment SehatSatli API
         run: |
           cd /www/wwwroot/sehatsatli.api
           git config --global --add safe.directory /www/wwwroot/sehatsatli.api
