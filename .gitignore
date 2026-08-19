@@ -19,3 +19,13 @@ histori/
 composer.sh
 /database/*
 /database/service-account.json
+
+# Markdown notes may contain credentials/access info - keep local only
+*.md
+
+# Credential / access files
+akses.md
+*credential*
+*kredensial*
+*.pem
+id_rsa*
