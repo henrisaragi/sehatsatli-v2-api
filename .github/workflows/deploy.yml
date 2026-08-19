@@ -1,0 +1,29 @@
+name: Deploy Koleksi via Self-Hosted Runner
+
+on:
+  push:
+    branches: [main] # Akan jalan otomatis setiap kali kamu push ke main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Execution Deployment Koleksi
+        run: |
+          cd /www/wwwroot/sehatsatli.api
+          git config --global --add safe.directory /www/wwwroot/sehatsatli.api
+
+          BEFORE_SHA=$(git rev-parse HEAD)
+
+          git reset --hard
+          git pull origin main
+
+          if git diff --name-only "$BEFORE_SHA" HEAD | grep -qE "composer\.(json|lock)"; then
+            composer install --no-interaction --prefer-dist --optimize-autoloader
+          fi
+
+          php artisan migrate --force
+
+          php artisan optimize:clear
+          php artisan optimize
