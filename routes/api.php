@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\PasswordResetOtpController;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\ApiGeneralReportController;
 use App\Http\Controllers\DiseaseController;
@@ -136,6 +137,10 @@ Route::post('auth/login', [AuthController::class, 'login']);
 Route::post('auth/login-app', [AuthController::class, 'loginApp']);
 Route::post('auth/logout', [AuthController::class, 'logout']);
 Route::post('auth/register', [AuthController::class, 'register']);
+
+Route::post('auth/password/otp/request', [PasswordResetOtpController::class, 'sendOtp'])->middleware('throttle:5,1');
+Route::post('auth/password/otp/verify', [PasswordResetOtpController::class, 'verifyOtp'])->middleware('throttle:10,1');
+Route::post('auth/password/otp/reset', [PasswordResetOtpController::class, 'reset'])->middleware('throttle:10,1');
 
 
 //Route::post('masterss', [ApiController::class, 'getMaster']);
