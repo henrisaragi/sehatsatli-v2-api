@@ -19,3 +19,4 @@ histori/
 composer.sh
 /database/*
 /database/service-account.json
+/database/db-backup

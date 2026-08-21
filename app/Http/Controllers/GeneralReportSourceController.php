@@ -22,6 +22,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Models\CommunityReport;
 
@@ -54,7 +55,8 @@ class GeneralReportSourceController extends Controller
 
             $params = $request->post();
             $query = GeneralReportSource::with('investigation', 'diagnoses.disease', 'lab', 'verification.disease', 'reporter', 'species', 'specieses', 'media', 'user', 'upt', 'location')->where('status', 1)
-                ->where('training', $params['id']);
+                ->Where('training', $params['id']);
+
 
             if ($current_user->upt_id) {
                 if ($current_user->upt_id > 2) {
@@ -74,6 +76,46 @@ class GeneralReportSourceController extends Controller
                 'success' => false,
                 'message' => "Error, cannot load data"
             ];
+        }
+    }
+
+    /**
+     * Get my reports (API)
+     *
+     * Laporan yang dibuat oleh user login, dengan relasi lengkap.
+     * Filter opsional `limit` (int) dan `training` (0/1).
+     *
+     * @group General Reports
+     */
+    public function getMyReports(Request $request)
+    {
+        try {
+            $request->validate([
+                'limit' => 'nullable|integer',
+                'training' => 'nullable|in:0,1',
+            ]);
+            $current_user = User::find(auth()->user()->id);
+            $params = $request->post();
+            $query = GeneralReportSource::with('investigation', 'diagnoses.disease', 'lab', 'verification.disease', 'reporter', 'species', 'specieses', 'media', 'user', 'upt', 'location')->where('status', 1)->where('user_id', $current_user->id);
+            if ($current_user->upt_id) {
+                if ($current_user->upt_id > 2) {
+                    $query->where('upt_id', $current_user->upt_id);
+                }
+            }
+            if (isset($params['training'])) {
+                $query->where('training', $params['training']);
+            }
+            $generalreportsource = $query->orderBy('report_date', 'DESC')->limit($params['limit'] ?? 100)->get();
+            return response()->json([
+                'success' => true,
+                'data' => $generalreportsource,
+            ]);
+        } catch (Exception $e) {
+            Log::info($this->controllerName . '-getMyReports: success=false; error=' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => "Error, cannot load data",
+            ], 500);
         }
     }
 
@@ -292,7 +334,7 @@ class GeneralReportSourceController extends Controller
         }
     }
 
-    /**
+    /**getMyReports
      * Hapus laporan kasus (soft delete)
      *
      * Tidak menghapus record secara fisik, hanya set `status = 0` sehingga

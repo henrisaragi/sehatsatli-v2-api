@@ -94,9 +94,10 @@ $apiRoutes = function () {
     Route::post('general-reports/uploadPhoto', [GeneralReportSourceController::class, 'uploadFile']);
     Route::post('general-reports/saveVerify', [GeneralReportSourceController::class, 'saveVerify']);
     Route::post('general-reports/saveLab', [GeneralReportSourceController::class, 'saveLab']);
-    Route::post('general-reports/saveInvestigation', [GeneralReportSourceController::class, 'saveInvestigation']);
+Route::post('general-reports/saveInvestigation', [GeneralReportSourceController::class, 'saveInvestigation']);
+Route::post('general-reports/getMyReports', [GeneralReportSourceController::class, 'getMyReports']);
 
-    Route::post('user-activities/getAll', [UserActivityController::class, 'getAll']);
+Route::post('user-activities/getAll', [UserActivityController::class, 'getAll']);
     Route::post('user-activities/track', [UserActivityController::class, 'save']);
     Route::post('user-active', [DashboardController::class, 'userActive']);
 

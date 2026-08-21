@@ -7,6 +7,8 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 class ApiGeneralReportController extends Controller
 {
